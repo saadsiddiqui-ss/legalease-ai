@@ -1,17 +1,8 @@
 import { useState, useRef, useCallback, useEffect, createContext, useContext } from "react";
 
-/* ─────────────────────────────────────────────
-   THEME CONTEXT
-───────────────────────────────────────────── */
 const ThemeCtx = createContext({ dark: false, toggle: () => {} });
 const useTheme = () => useContext(ThemeCtx);
 
-/* ─────────────────────────────────────────────
-   CSS — DESIGN SYSTEM
-   Aesthetic: "Glacial Precision"
-   Dark obsidian with ice-blue accents, editorial
-   typography, surgical spacing, ultra-smooth motion
-───────────────────────────────────────────── */
 const BASE_CSS = `
 @import url('https://fonts.googleapis.com/css2?family=Editorial+New:ital,wght@0,400;0,700;1,400&family=Instrument+Sans:wght@400;500;600;700&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Instrument+Sans:wght@400;500;600;700&display=swap');
@@ -19,25 +10,25 @@ const BASE_CSS = `
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
-  --bg:       #fafaf9;
-  --bg-2:     #f4f3f0;
-  --bg-3:     #eeecea;
-  --surface:  #ffffff;
-  --border:   rgba(0,0,0,0.08);
+  --bg: #fafaf9;
+  --bg-2: #f4f3f0;
+  --bg-3: #eeecea;
+  --surface: #ffffff;
+  --border: rgba(0,0,0,0.08);
   --border-2: rgba(0,0,0,0.14);
-  --ink:      #0a0a0a;
-  --ink-2:    #3a3a3a;
-  --ink-3:    #777;
-  --ink-4:    #aaa;
-  --accent:   #0057ff;
+  --ink: #0a0a0a;
+  --ink-2: #3a3a3a;
+  --ink-3: #777;
+  --ink-4: #aaa;
+  --accent: #0057ff;
   --accent-2: #3d7bff;
-  --accent-bg:#e8efff;
-  --gold:     #c9963d;
-  --gold-bg:  #fdf4e3;
-  --green:    #0b7a3e;
+  --accent-bg: #e8efff;
+  --gold: #c9963d;
+  --gold-bg: #fdf4e3;
+  --green: #0b7a3e;
   --green-bg: #e3f5ec;
-  --red:      #c03a2b;
-  --red-bg:   #fcecea;
+  --red: #c03a2b;
+  --red-bg: #fcecea;
   --shadow-xs:0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
   --shadow-sm:0 4px 12px rgba(0,0,0,0.08), 0 1px 3px rgba(0,0,0,0.05);
   --shadow-md:0 8px 28px rgba(0,0,0,0.10), 0 2px 8px rgba(0,0,0,0.06);
@@ -52,25 +43,25 @@ const BASE_CSS = `
 }
 
 [data-dark] {
-  --bg:       #0c0c0d;
-  --bg-2:     #111113;
-  --bg-3:     #18181b;
-  --surface:  #1a1a1e;
-  --border:   rgba(255,255,255,0.08);
+  --bg: #0c0c0d;
+  --bg-2: #111113;
+  --bg-3: #18181b;
+  --surface: #1a1a1e;
+  --border: rgba(255,255,255,0.08);
   --border-2: rgba(255,255,255,0.14);
-  --ink:      #f0f0ef;
-  --ink-2:    #c8c8c5;
-  --ink-3:    #888;
-  --ink-4:    #555;
-  --accent:   #4d8aff;
+  --ink: #f0f0ef;
+  --ink-2: #c8c8c5;
+  --ink-3: #888;
+  --ink-4: #555;
+  --accent: #4d8aff;
   --accent-2: #7aaaff;
-  --accent-bg:rgba(77,138,255,0.12);
-  --gold:     #e0b060;
-  --gold-bg:  rgba(224,176,96,0.1);
-  --green:    #2ecc71;
+  --accent-bg: rgba(77,138,255,0.12);
+  --gold: #e0b060;
+  --gold-bg: rgba(224,176,96,0.1);
+  --green: #2ecc71;
   --green-bg: rgba(46,204,113,0.1);
-  --red:      #ff6b5b;
-  --red-bg:   rgba(255,107,91,0.1);
+  --red: #ff6b5b;
+  --red-bg: rgba(255,107,91,0.1);
   --shadow-xs:0 1px 3px rgba(0,0,0,0.3);
   --shadow-sm:0 4px 12px rgba(0,0,0,0.4);
   --shadow-md:0 8px 28px rgba(0,0,0,0.5);
@@ -89,17 +80,11 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-/* ── SCROLLBAR ── */
 ::-webkit-scrollbar { width: 6px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: var(--border-2); border-radius: 99px; }
-
-/* ── SELECTION ── */
 ::selection { background: var(--accent-bg); color: var(--accent); }
 
-/* ─────────────────────────────────────────────
-   ANIMATIONS
-───────────────────────────────────────────── */
 @keyframes fadeUp   { from { opacity:0; transform:translateY(20px) } to { opacity:1; transform:none } }
 @keyframes fadeIn   { from { opacity:0 } to { opacity:1 } }
 @keyframes scaleIn  { from { opacity:0; transform:scale(0.95) } to { opacity:1; transform:none } }
@@ -108,13 +93,10 @@ body {
 @keyframes shimmer  { from { background-position:-200% 0 } to { background-position:200% 0 } }
 @keyframes pulse    { 0%,100% { opacity:1;transform:scale(1) } 50% { opacity:.5;transform:scale(.8) } }
 @keyframes toastIn  { from { opacity:0; transform:translateX(24px) } to { opacity:1; transform:none } }
-@keyframes toastOut { from { opacity:1; transform:none } to { opacity:0; transform:translateX(24px) } }
 @keyframes bounceDot{ 0%,80%,100% { transform:scale(0) } 40% { transform:scale(1) } }
 @keyframes gradShift{ 0%,100% { background-position:0% 50% } 50% { background-position:100% 50% } }
+@keyframes shrink { from { width:100% } to { width:0 } }
 
-/* ─────────────────────────────────────────────
-   NAVBAR
-───────────────────────────────────────────── */
 .nav {
   position: fixed; top: 0; left: 0; right: 0; z-index: 100;
   display: flex; align-items: center; justify-content: space-between;
@@ -154,7 +136,6 @@ body {
 }
 .nav-right { display: flex; gap: 8px; align-items: center; }
 
-/* ── HAMBURGER ── */
 .hamburger {
   display: none; flex-direction: column; gap: 5px; background: none; border: none;
   padding: 6px; cursor: pointer; border-radius: var(--r-sm);
@@ -169,7 +150,6 @@ body {
 .hamburger.open .ham-bar:nth-child(2) { opacity: 0; transform: scaleX(0); }
 .hamburger.open .ham-bar:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
 
-/* ── MOBILE NAV ── */
 .mobile-menu {
   display: none; position: fixed; top: 60px; inset-inline: 0; z-index: 99;
   background: color-mix(in srgb, var(--bg) 95%, transparent);
@@ -189,9 +169,6 @@ body {
 .mobile-btns { display: flex; gap: 8px; padding: 8px 0; }
 .mobile-btns > * { flex: 1; }
 
-/* ─────────────────────────────────────────────
-   BUTTONS
-───────────────────────────────────────────── */
 .btn {
   display: inline-flex; align-items: center; justify-content: center;
   gap: 7px; border: none; border-radius: var(--r-sm);
@@ -206,39 +183,24 @@ body {
 }
 .btn:hover::after { opacity:1; }
 .btn:active { transform: scale(0.97); }
-
 .btn-sm  { padding: 7px 14px; font-size: 13px; border-radius: var(--r-sm); }
 .btn-md  { padding: 10px 20px; }
 .btn-lg  { padding: 14px 28px; font-size: 15px; border-radius: var(--r-md); }
 .btn-xl  { padding: 16px 36px; font-size: 16px; border-radius: var(--r-md); }
-
-.btn-primary {
-  background: var(--ink); color: var(--bg);
-  box-shadow: var(--shadow-xs);
-}
+.btn-primary { background: var(--ink); color: var(--bg); box-shadow: var(--shadow-xs); }
 .btn-primary:hover { background: var(--ink-2); transform: translateY(-1px); box-shadow: var(--shadow-md); }
-
 .btn-accent {
   background: var(--accent); color: #fff;
   box-shadow: 0 4px 16px color-mix(in srgb, var(--accent) 30%, transparent);
 }
 .btn-accent:hover { filter: brightness(1.1); transform: translateY(-1px); box-shadow: 0 8px 24px color-mix(in srgb, var(--accent) 40%, transparent); }
-
 .btn-ghost {
   background: transparent; color: var(--ink);
   border: 1px solid var(--border-2);
 }
 .btn-ghost:hover { background: var(--bg-2); border-color: var(--border-2); }
-
-.btn-glass {
-  background: color-mix(in srgb, var(--surface) 60%, transparent);
-  color: var(--ink); border: 1px solid var(--border);
-  backdrop-filter: blur(12px);
-}
-.btn-glass:hover { background: var(--surface); box-shadow: var(--shadow-sm); }
-
 .btn-success { background: var(--green); color: #fff; }
-.btn-danger  { background: var(--red);   color: #fff; }
+.btn-danger { background: var(--red); color: #fff; }
 
 .btn-icon {
   width: 36px; height: 36px; padding: 0; border-radius: var(--r-sm);
@@ -247,9 +209,6 @@ body {
 }
 .btn-icon:hover { background: var(--bg-3); color: var(--ink); }
 
-/* ─────────────────────────────────────────────
-   HERO
-───────────────────────────────────────────── */
 .hero {
   min-height: 100vh; display: flex; flex-direction: column;
   align-items: center; justify-content: center;
@@ -275,7 +234,6 @@ body {
   background-size: 56px 56px;
   mask-image: radial-gradient(ellipse 80% 80% at 50% 40%, black 20%, transparent 80%);
 }
-
 .hero-eyebrow {
   display: inline-flex; align-items: center; gap: 8px;
   background: var(--surface); border: 1px solid var(--border);
@@ -287,9 +245,7 @@ body {
 .eyebrow-dot {
   width: 7px; height: 7px; border-radius: 50%;
   background: var(--accent); animation: pulse 2s infinite;
-  box-shadow: 0 0 0 0 var(--accent);
 }
-
 .hero-h1 {
   font-family: var(--font-display); font-size: clamp(52px, 8vw, 96px);
   font-weight: 800; line-height: 1.02; letter-spacing: -3px;
@@ -302,7 +258,6 @@ body {
   -webkit-text-fill-color: transparent; background-clip: text;
   animation: gradShift 4s ease infinite;
 }
-
 .hero-sub {
   font-size: clamp(16px, 2vw, 19px); color: var(--ink-3); max-width: 500px;
   line-height: 1.75; margin-bottom: 44px; position: relative; z-index: 1;
@@ -312,7 +267,6 @@ body {
   display: flex; gap: 12px; align-items: center; justify-content: center;
   flex-wrap: wrap; position: relative; z-index: 1; animation: fadeUp 0.6s 0.3s both;
 }
-
 .hero-stats {
   margin-top: 80px; display: flex; gap: 0; align-items: stretch;
   position: relative; z-index: 1; animation: fadeUp 0.6s 0.4s both;
@@ -329,9 +283,6 @@ body {
 .stat-n { font-family: var(--font-display); font-size: 26px; font-weight: 800; color: var(--ink); line-height: 1; }
 .stat-l { font-size: 11px; color: var(--ink-4); margin-top: 4px; letter-spacing: 0.3px; }
 
-/* ─────────────────────────────────────────────
-   TRUST BAR
-───────────────────────────────────────────── */
 .trust-bar {
   background: var(--bg-2); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);
   padding: 14px 56px; display: flex; align-items: center; justify-content: center;
@@ -340,16 +291,12 @@ body {
 .trust-item { display: flex; align-items: center; gap: 7px; font-size: 13px; font-weight: 500; color: var(--ink-3); }
 .trust-item span { font-size: 14px; }
 
-/* ─────────────────────────────────────────────
-   SECTIONS
-───────────────────────────────────────────── */
 .section { padding: 100px 56px; }
 .section-center { text-align: center; }
 .eyebrow {
   display: inline-block; font-size: 11px; font-weight: 700; letter-spacing: 2px;
   text-transform: uppercase; color: var(--accent); margin-bottom: 16px;
 }
-
 .section-h2 {
   font-family: var(--font-display); font-size: clamp(34px, 4vw, 54px);
   font-weight: 800; line-height: 1.1; letter-spacing: -1.5px; color: var(--ink);
@@ -359,7 +306,6 @@ body {
   max-width: 520px; margin: 16px auto 0;
 }
 
-/* ── FEATURE CARDS ── */
 .features-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; margin-top: 60px; }
 .feat-card {
   background: var(--surface); border: 1px solid var(--border);
@@ -382,7 +328,6 @@ body {
 .feat-title { font-family: var(--font-display); font-size: 18px; font-weight: 700; margin-bottom: 10px; letter-spacing: -0.3px; }
 .feat-desc { font-size: 14px; color: var(--ink-3); line-height: 1.75; }
 
-/* ── HOW SECTION ── */
 .how-section { background: var(--ink); color: var(--bg); padding: 100px 56px; }
 [data-dark] .how-section { background: var(--bg-3); }
 .how-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 0; margin-top: 60px; border: 1px solid rgba(255,255,255,0.08); border-radius: var(--r-xl); overflow: hidden; }
@@ -396,7 +341,6 @@ body {
 .how-title { font-family: var(--font-display); font-size: 18px; font-weight: 700; margin-bottom: 10px; color: rgba(255,255,255,0.9); }
 .how-desc { font-size: 14px; color: rgba(255,255,255,0.45); line-height: 1.75; }
 
-/* ── TESTIMONIALS ── */
 .testi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; margin-top: 52px; }
 .testi-card {
   background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-xl);
@@ -414,9 +358,6 @@ body {
 .testi-name { font-size: 13px; font-weight: 600; }
 .testi-role { font-size: 12px; color: var(--ink-4); }
 
-/* ─────────────────────────────────────────────
-   ABOUT PAGE
-───────────────────────────────────────────── */
 .about-hero { padding: 140px 56px 80px; text-align: center; position: relative; overflow: hidden; }
 .about-mission-box {
   background: var(--ink); color: var(--bg); border-radius: var(--r-xl);
@@ -438,7 +379,6 @@ body {
 .value-num { font-size: 11px; font-weight: 700; color: var(--accent); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 10px; }
 .value-title { font-family: var(--font-display); font-size: 18px; font-weight: 700; margin-bottom: 8px; }
 .value-desc { font-size: 14px; color: var(--ink-3); line-height: 1.7; }
-
 .stats-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 16px; margin-bottom: 60px; }
 .stat-card {
   background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-xl);
@@ -447,7 +387,6 @@ body {
 .stat-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-md); border-color: var(--accent); }
 .stat-big { font-family: var(--font-display); font-size: 38px; font-weight: 800; color: var(--ink); line-height: 1; }
 .stat-small { font-size: 12px; color: var(--ink-4); margin-top: 8px; }
-
 .team-section { background: var(--bg-2); border-radius: var(--r-xl); padding: 48px; margin-bottom: 60px; border: 1px solid var(--border); }
 .team-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 24px; margin-top: 40px; }
 .team-card { text-align: center; transition: transform 0.3s var(--ease-spring); }
@@ -461,9 +400,6 @@ body {
 .team-name { font-family: var(--font-display); font-size: 15px; font-weight: 700; margin-bottom: 4px; }
 .team-role { font-size: 12px; color: var(--ink-3); }
 
-/* ─────────────────────────────────────────────
-   CONTACT PAGE
-───────────────────────────────────────────── */
 .contact-page { padding: 140px 56px 80px; }
 .contact-grid { display: grid; grid-template-columns: 1fr 1.4fr; gap: 60px; max-width: 960px; margin: 60px auto 0; align-items: start; }
 .contact-method {
@@ -479,7 +415,6 @@ body {
 }
 .contact-method-title { font-size: 13px; font-weight: 600; }
 .contact-method-val { font-size: 12px; color: var(--ink-3); }
-
 .contact-form-card {
   background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-xl);
   padding: 36px; box-shadow: var(--shadow-sm);
@@ -501,7 +436,6 @@ body {
   border-radius: var(--r-md); padding: 24px; text-align: center; color: var(--green);
   animation: scaleIn 0.3s var(--ease-spring);
 }
-
 .faq-section { max-width: 760px; margin: 80px auto 0; }
 .faq-item { border-bottom: 1px solid var(--border); }
 .faq-q {
@@ -515,12 +449,8 @@ body {
 .faq-a { font-size: 14px; color: var(--ink-3); line-height: 1.8; max-height: 0; overflow: hidden; transition: max-height 0.4s, padding 0.3s; }
 .faq-a.open { max-height: 200px; padding-bottom: 20px; }
 
-/* ─────────────────────────────────────────────
-   UPLOAD PAGE
-───────────────────────────────────────────── */
 .upload-page { min-height: 100vh; padding: 100px 24px 80px; display: flex; flex-direction: column; align-items: center; }
 .upload-wrap { width: 100%; max-width: 640px; }
-
 .drop-zone {
   border: 2px dashed var(--border-2); border-radius: var(--r-xl);
   padding: 60px 32px; text-align: center; cursor: pointer;
@@ -549,7 +479,6 @@ body {
   background: var(--bg-2); border: 1px solid var(--border); border-radius: 6px;
   padding: 3px 9px; font-size: 11px; font-weight: 700; color: var(--ink-3); letter-spacing: 0.5px;
 }
-
 .file-preview {
   margin-top: 16px; background: var(--surface); border: 1px solid var(--border);
   border-radius: var(--r-md); padding: 16px 20px; display: flex; align-items: center; gap: 14px;
@@ -558,14 +487,11 @@ body {
 .file-info { flex: 1; }
 .file-name { font-weight: 600; font-size: 14px; }
 .file-size { font-size: 12px; color: var(--ink-4); margin-top: 2px; }
-
-/* PROGRESS BAR */
 .progress-bar-wrap { margin-top: 12px; height: 3px; background: var(--bg-2); border-radius: 99px; overflow: hidden; }
 .progress-bar-fill {
   height: 100%; border-radius: 99px; background: linear-gradient(90deg, var(--accent), var(--accent-2));
   transition: width 0.4s var(--ease-smooth);
 }
-
 .or-divider { display: flex; align-items: center; gap: 14px; margin: 20px 0; color: var(--ink-4); font-size: 13px; }
 .or-divider::before, .or-divider::after { content:''; flex:1; height:1px; background:var(--border); }
 .paste-area {
@@ -584,16 +510,11 @@ body {
 .simplify-btn:disabled { opacity: 0.35; cursor: not-allowed; }
 .security-note { text-align: center; font-size: 12px; color: var(--ink-4); margin-top: 10px; display: flex; align-items: center; justify-content: center; gap: 5px; }
 
-/* ─────────────────────────────────────────────
-   PROCESSING PAGE — SKELETON LOADER
-───────────────────────────────────────────── */
 .proc-page { min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 48px; }
-
 .skeleton {
   background: linear-gradient(90deg, var(--bg-2) 25%, var(--bg-3) 50%, var(--bg-2) 75%);
   background-size: 200% 100%; animation: shimmer 1.5s infinite; border-radius: var(--r-sm);
 }
-
 .proc-skeleton-wrap { width: 100%; max-width: 640px; margin-top: 40px; }
 .skel-line { height: 14px; margin-bottom: 10px; }
 .skel-line.short { width: 40%; }
@@ -602,7 +523,6 @@ body {
 .skel-line.full { width: 100%; }
 .skel-block { height: 80px; margin-bottom: 14px; border-radius: var(--r-md); }
 .skel-header { height: 28px; width: 50%; margin-bottom: 20px; border-radius: var(--r-sm); }
-
 .spinner-ring {
   width: 48px; height: 48px; border-radius: 50%;
   border: 3px solid var(--border-2); border-top-color: var(--accent);
@@ -610,7 +530,6 @@ body {
 }
 .proc-label { font-family: var(--font-display); font-size: 26px; font-weight: 700; margin-bottom: 8px; }
 .proc-sub { color: var(--ink-3); font-size: 15px; }
-
 .typing-dots { display: flex; gap: 4px; justify-content: center; margin-top: 16px; }
 .typing-dots span {
   width: 7px; height: 7px; border-radius: 50%; background: var(--accent);
@@ -618,7 +537,6 @@ body {
 }
 .typing-dots span:nth-child(2) { animation-delay: 0.15s; }
 .typing-dots span:nth-child(3) { animation-delay: 0.3s; }
-
 .step-pills { display: flex; gap: 8px; margin-top: 32px; flex-wrap: wrap; justify-content: center; }
 .step-pill {
   background: var(--bg-2); border: 1px solid var(--border); border-radius: 99px;
@@ -628,15 +546,11 @@ body {
 .step-pill.active { border-color: var(--accent); color: var(--accent); background: var(--accent-bg); }
 .step-pill.done { border-color: var(--green); color: var(--green); background: var(--green-bg); }
 
-/* ─────────────────────────────────────────────
-   RESULT PAGE
-───────────────────────────────────────────── */
 .result-page { min-height: 100vh; padding: 100px 56px 80px; }
 .result-hdr { display: flex; align-items: flex-start; justify-content: space-between; gap: 24px; flex-wrap: wrap; margin-bottom: 28px; }
 .result-hdr-title { font-family: var(--font-display); font-size: 36px; font-weight: 800; letter-spacing: -1px; }
 .result-hdr-sub { color: var(--ink-3); margin-top: 4px; font-size: 14px; }
 .result-acts { display: flex; gap: 8px; flex-wrap: wrap; align-items: flex-start; padding-top: 4px; }
-
 .tabs { display: inline-flex; background: var(--bg-2); border-radius: var(--r-md); padding: 4px; gap: 2px; margin-bottom: 24px; border: 1px solid var(--border); }
 .tab-btn {
   padding: 7px 22px; border-radius: var(--r-sm); font-size: 13px; font-weight: 600;
@@ -644,13 +558,11 @@ body {
   font-family: var(--font-body); white-space: nowrap;
 }
 .tab-btn.on { background: var(--surface); color: var(--ink); box-shadow: var(--shadow-xs); }
-
 .result-card {
   background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-xl);
   padding: 40px; line-height: 1.85; animation: fadeIn 0.4s;
 }
 .result-card.simplified { border-color: color-mix(in srgb, var(--accent) 30%, transparent); }
-
 .result-badge {
   display: inline-flex; align-items: center; gap: 6px; border-radius: 99px;
   font-size: 11px; font-weight: 700; letter-spacing: 0.8px; text-transform: uppercase;
@@ -658,11 +570,9 @@ body {
 }
 .result-badge.ai { background: var(--accent-bg); color: var(--accent); }
 .result-badge.original { background: var(--bg-2); color: var(--ink-3); }
-
 .sec-label { font-size: 11px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: var(--accent); margin-bottom: 12px; }
 .sec-block { margin-bottom: 28px; padding-bottom: 28px; border-bottom: 1px solid var(--border); }
 .sec-block:last-child { margin-bottom: 0; padding-bottom: 0; border-bottom: none; }
-
 .kp-list { list-style: none; display: flex; flex-direction: column; gap: 8px; }
 .kp {
   display: flex; gap: 12px; align-items: flex-start; padding: 12px 14px;
@@ -672,24 +582,78 @@ body {
 .kp:hover { transform: translateX(3px); background: var(--accent-bg); }
 .kp-icon { color: var(--accent); font-size: 13px; flex-shrink: 0; margin-top: 2px; }
 .kp-txt { font-size: 14px; line-height: 1.65; }
-
 .risk-item {
   display: flex; gap: 10px; align-items: flex-start; padding: 11px 14px;
   background: var(--red-bg); border-radius: var(--r-md); margin-bottom: 7px;
   border-left: 3px solid var(--red); font-size: 14px; line-height: 1.6;
 }
 .risk-icon { color: var(--red); flex-shrink: 0; }
-
-/* ── COPY ANIMATION ── */
 .copy-flash {
   position: fixed; inset: 0; z-index: 999; pointer-events: none;
   background: color-mix(in srgb, var(--accent) 8%, transparent);
   animation: fadeIn 0.15s, fadeIn 0.15s 0.3s reverse both;
 }
 
-/* ─────────────────────────────────────────────
-   AUTH MODAL
-───────────────────────────────────────────── */
+.history-wrap { margin-top: 28px; }
+.history-head {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 12px; margin-bottom: 16px; flex-wrap: wrap;
+}
+.history-title {
+  font-family: var(--font-display);
+  font-size: 24px;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+}
+.history-sub { font-size: 13px; color: var(--ink-3); }
+.history-grid { display: grid; gap: 14px; }
+.history-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  padding: 20px;
+  transition: all 0.25s var(--ease-smooth);
+}
+.history-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-sm);
+  border-color: var(--accent);
+}
+.history-card-top {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 10px; margin-bottom: 12px; flex-wrap: wrap;
+}
+.history-badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: var(--accent-bg); color: var(--accent);
+  border-radius: 99px; padding: 5px 12px; font-size: 11px;
+  font-weight: 700; letter-spacing: 0.8px; text-transform: uppercase;
+}
+.history-date { font-size: 12px; color: var(--ink-4); }
+.history-label {
+  font-size: 11px; font-weight: 700; letter-spacing: 1px;
+  text-transform: uppercase; color: var(--ink-4); margin-bottom: 6px;
+}
+.history-text {
+  font-size: 14px; line-height: 1.8; color: var(--ink-2); white-space: pre-wrap;
+}
+.history-divider { height: 1px; background: var(--border); margin: 14px 0; }
+.history-empty {
+  background: var(--surface);
+  border: 1px dashed var(--border-2);
+  border-radius: var(--r-lg);
+  padding: 26px;
+  text-align: center;
+  color: var(--ink-3);
+  font-size: 14px;
+}
+.history-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 14px;
+}
+
 .modal-overlay {
   position: fixed; inset: 0; z-index: 200;
   background: rgba(0,0,0,0.55); backdrop-filter: blur(8px);
@@ -720,9 +684,6 @@ body {
 .modal-sw { text-align: center; margin-top: 18px; font-size: 13px; color: var(--ink-3); }
 .modal-sw button { background: none; border: none; color: var(--accent); font-weight: 600; font-family: var(--font-body); cursor: pointer; font-size: 13px; }
 
-/* ─────────────────────────────────────────────
-   TOAST
-───────────────────────────────────────────── */
 .toast-container { position: fixed; bottom: 28px; right: 28px; z-index: 400; display: flex; flex-direction: column; gap: 8px; pointer-events: none; }
 .toast {
   background: var(--ink); color: var(--bg); padding: 13px 20px;
@@ -745,11 +706,7 @@ body {
   background: rgba(255,255,255,0.25); border-radius: 0 0 var(--r-md) var(--r-md);
   animation: shrink 3s linear forwards;
 }
-@keyframes shrink { from { width:100% } to { width:0 } }
 
-/* ─────────────────────────────────────────────
-   DARK MODE TOGGLE
-───────────────────────────────────────────── */
 .theme-toggle {
   width: 40px; height: 22px; border-radius: 99px; background: var(--bg-3);
   border: 1px solid var(--border-2); cursor: pointer; position: relative;
@@ -763,9 +720,6 @@ body {
 }
 [data-dark] .theme-knob { left: calc(100% - 18px); background: var(--accent); }
 
-/* ─────────────────────────────────────────────
-   FOOTER
-───────────────────────────────────────────── */
 .footer {
   background: var(--ink); color: rgba(255,255,255,0.5);
   padding: 72px 56px 32px;
@@ -788,9 +742,6 @@ body {
   flex-wrap: wrap; gap: 12px; font-size: 12px;
 }
 
-/* ─────────────────────────────────────────────
-   CTA SECTION
-───────────────────────────────────────────── */
 .cta-section {
   padding: 80px 56px; background: var(--ink); text-align: center; position: relative; overflow: hidden;
 }
@@ -803,23 +754,10 @@ body {
 .cta-h2 { font-family: var(--font-display); font-size: clamp(32px,5vw,58px); font-weight: 800; color: #fff; letter-spacing: -1.5px; margin-bottom: 20px; line-height: 1.08; position: relative; }
 .cta-sub { color: rgba(255,255,255,0.55); font-size: 17px; margin-bottom: 36px; position: relative; }
 
-/* ─────────────────────────────────────────────
-   SCROLL REVEAL (JS-driven)
-───────────────────────────────────────────── */
 .reveal { opacity: 0; transform: translateY(28px); transition: opacity 0.65s var(--ease-smooth), transform 0.65s var(--ease-smooth); }
 .reveal.visible { opacity: 1; transform: none; }
-.reveal-delay-1 { transition-delay: 0.1s; }
-.reveal-delay-2 { transition-delay: 0.2s; }
-.reveal-delay-3 { transition-delay: 0.3s; }
-
-/* ─────────────────────────────────────────────
-   PAGE TRANSITIONS
-───────────────────────────────────────────── */
 .page-enter { animation: fadeUp 0.4s var(--ease-smooth) both; }
 
-/* ─────────────────────────────────────────────
-   MOBILE
-───────────────────────────────────────────── */
 @media (max-width: 768px) {
   .nav { padding: 0 20px; }
   .nav-links { display: none; }
@@ -844,23 +782,23 @@ body {
 }
 `;
 
-/* ─────────────────────────────────────────────
-   HOOK: SCROLL REVEAL
-───────────────────────────────────────────── */
 function useScrollReveal() {
   useEffect(() => {
     const els = document.querySelectorAll('.reveal');
     const obs = new IntersectionObserver((entries) => {
-      entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); obs.unobserve(e.target); } });
+      entries.forEach(e => {
+        if (e.isIntersecting) {
+          e.target.classList.add('visible');
+          obs.unobserve(e.target);
+        }
+      });
     }, { threshold: 0.1, rootMargin: '0px 0px -60px 0px' });
+
     els.forEach(el => obs.observe(el));
     return () => obs.disconnect();
   });
 }
 
-/* ─────────────────────────────────────────────
-   HOOK: CARD MOUSE GLOW
-───────────────────────────────────────────── */
 function useCardGlow(ref) {
   useEffect(() => {
     const el = ref?.current;
@@ -875,9 +813,6 @@ function useCardGlow(ref) {
   }, [ref]);
 }
 
-/* ─────────────────────────────────────────────
-   TOAST SYSTEM
-───────────────────────────────────────────── */
 function ToastContainer({ toasts, dismiss }) {
   return (
     <div className="toast-container">
@@ -896,7 +831,7 @@ function ToastContainer({ toasts, dismiss }) {
 function useToasts() {
   const [toasts, setToasts] = useState([]);
   const show = useCallback((msg, type = 'success') => {
-    const id = Date.now();
+    const id = Date.now() + Math.random();
     setToasts(p => [...p, { id, msg, type }]);
     setTimeout(() => setToasts(p => p.filter(t => t.id !== id)), 3200);
   }, []);
@@ -904,18 +839,34 @@ function useToasts() {
   return { toasts, show, dismiss };
 }
 
-/* ─────────────────────────────────────────────
-   DEMO DATA
-───────────────────────────────────────────── */
 function getDemoText() {
-  return `TERMS AND CONDITIONS OF SERVICE AGREEMENT\n\nThis Terms and Conditions of Service Agreement ("Agreement") is entered into as of the date of acceptance ("Effective Date") by and between LegalCorp Inc., a Delaware corporation ("Company"), and the individual accepting these terms ("User").\n\n1. ACCEPTANCE OF TERMS\nBy accessing or using the Service, you acknowledge that you have read, understood, and agree to be bound by this Agreement. The Company reserves the right, in its sole discretion, to modify these terms at any time without prior notice.\n\n2. LIMITATION OF LIABILITY\nTO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW, IN NO EVENT SHALL THE COMPANY BE LIABLE FOR ANY INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL, OR PUNITIVE DAMAGES, INCLUDING WITHOUT LIMITATION, LOSS OF PROFITS, DATA, USE, GOODWILL, OR OTHER INTANGIBLE LOSSES.\n\n3. INDEMNIFICATION\nYou agree to defend, indemnify, and hold harmless the Company and its employees, contractors, agents, officers and directors, from and against any and all claims, damages, obligations, losses, liabilities, costs or debt, and expenses.\n\n4. GOVERNING LAW\nThese Terms shall be governed by the laws of the State of Delaware, United States. Any disputes shall be resolved through binding arbitration.`;
+  return `TERMS AND CONDITIONS OF SERVICE AGREEMENT
+
+This Terms and Conditions of Service Agreement ("Agreement") is entered into as of the date of acceptance ("Effective Date") by and between LegalCorp Inc., a Delaware corporation ("Company"), and the individual accepting these terms ("User").
+
+1. ACCEPTANCE OF TERMS
+By accessing or using the Service, you acknowledge that you have read, understood, and agree to be bound by this Agreement. The Company reserves the right, in its sole discretion, to modify these terms at any time without prior notice.
+
+2. LIMITATION OF LIABILITY
+TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW, IN NO EVENT SHALL THE COMPANY BE LIABLE FOR ANY INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL, OR PUNITIVE DAMAGES, INCLUDING WITHOUT LIMITATION, LOSS OF PROFITS, DATA, USE, GOODWILL, OR OTHER INTANGIBLE LOSSES.
+
+3. INDEMNIFICATION
+You agree to defend, indemnify, and hold harmless the Company and its employees, contractors, agents, officers and directors, from and against any and all claims, damages, obligations, losses, liabilities, costs or debt, and expenses.
+
+4. GOVERNING LAW
+These Terms shall be governed by the laws of the State of Delaware, United States. Any disputes shall be resolved through binding arbitration.`;
 }
 
 function parseAI(text) {
   const sec = {};
   const lines = text.split('\n');
   let cur = 'summary', buf = [];
-  const flush = () => { if (buf.length) sec[cur] = buf.join('\n').trim(); buf = []; };
+
+  const flush = () => {
+    if (buf.length) sec[cur] = buf.join('\n').trim();
+    buf = [];
+  };
+
   for (const l of lines) {
     if (/SUMMARY/i.test(l)) { flush(); cur = 'summary'; }
     else if (/KEY POINTS|IMPORTANT/i.test(l)) { flush(); cur = 'kp'; }
@@ -923,8 +874,15 @@ function parseAI(text) {
     else if (/PLAIN ENGLISH|SIMPLE/i.test(l)) { flush(); cur = 'plain'; }
     else buf.push(l);
   }
+
   flush();
-  const bullets = t => (t || '').split('\n').map(l => l.replace(/^[-•*\d.]+\s*/, '').trim()).filter(Boolean);
+
+  const bullets = (t) =>
+    (t || '')
+      .split('\n')
+      .map(l => l.replace(/^[-•*\d.]+\s*/, '').trim())
+      .filter(Boolean);
+
   return {
     summary: sec.summary || text.slice(0, 400),
     keyPoints: bullets(sec.kp).slice(0, 5),
@@ -933,9 +891,6 @@ function parseAI(text) {
   };
 }
 
-/* ─────────────────────────────────────────────
-   THEME TOGGLE BUTTON
-───────────────────────────────────────────── */
 function ThemeToggle() {
   const { dark, toggle } = useTheme();
   return (
@@ -945,19 +900,20 @@ function ThemeToggle() {
   );
 }
 
-/* ─────────────────────────────────────────────
-   NAVBAR
-───────────────────────────────────────────── */
 function Navbar({ page, setPage, onLogin, onSignup, user, onLogout }) {
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+
   useEffect(() => {
     const h = () => setScrolled(window.scrollY > 20);
     window.addEventListener('scroll', h);
     return () => window.removeEventListener('scroll', h);
   }, []);
 
-  const go = (p) => { setPage(p); setMenuOpen(false); };
+  const go = (p) => {
+    setPage(p);
+    setMenuOpen(false);
+  };
 
   return (
     <>
@@ -965,12 +921,14 @@ function Navbar({ page, setPage, onLogin, onSignup, user, onLogout }) {
         <div className="nav-logo" onClick={() => go('home')}>
           LegalEase <span className="nav-badge">AI</span>
         </div>
+
         <div className="nav-links">
           {[['home','Home'],['about','About'],['contact','Contact']].map(([p,l]) => (
             <button key={p} className={`nav-link${page === p ? ' active' : ''}`} onClick={() => go(p)}>{l}</button>
           ))}
           <button className={`nav-link${page === 'upload' ? ' active' : ''}`} onClick={() => go('upload')}>Simplify</button>
         </div>
+
         <div className="nav-right" style={{ gap: 8, display: 'flex', alignItems: 'center' }}>
           <ThemeToggle />
           {user ? (
@@ -989,6 +947,7 @@ function Navbar({ page, setPage, onLogin, onSignup, user, onLogout }) {
           </button>
         </div>
       </nav>
+
       {menuOpen && (
         <div className="mobile-menu open">
           {[['home','Home'],['about','About'],['contact','Contact'],['upload','Simplify']].map(([p,l]) => (
@@ -1011,9 +970,6 @@ function Navbar({ page, setPage, onLogin, onSignup, user, onLogout }) {
   );
 }
 
-/* ─────────────────────────────────────────────
-   HOME PAGE
-───────────────────────────────────────────── */
 function HomePage({ setPage }) {
   useScrollReveal();
 
@@ -1034,7 +990,6 @@ function HomePage({ setPage }) {
 
   return (
     <>
-      {/* HERO */}
       <section className="hero">
         <div className="hero-mesh" /><div className="hero-noise" /><div className="hero-grid" />
         <div className="hero-eyebrow" style={{ position:'relative', zIndex:1 }}>
@@ -1062,14 +1017,12 @@ function HomePage({ setPage }) {
         </div>
       </section>
 
-      {/* TRUST BAR */}
       <div className="trust-bar">
         {[['🔒','256-bit Encryption'],['✓','SOC 2 Compliant'],['⚡','99.9% Uptime'],['🌐','40+ Countries'],['★','4.9 on ProductHunt']].map(([ic,lb]) => (
           <div className="trust-item" key={lb}><span>{ic}</span>{lb}</div>
         ))}
       </div>
 
-      {/* FEATURES */}
       <section className="section">
         <div className="reveal section-center">
           <div className="eyebrow">Why LegalEase</div>
@@ -1081,7 +1034,6 @@ function HomePage({ setPage }) {
         </div>
       </section>
 
-      {/* HOW IT WORKS */}
       <section className="how-section">
         <div className="eyebrow" style={{ color: 'var(--accent-2)' }}>The Process</div>
         <h2 className="section-h2" style={{ color: '#fff', maxWidth: 500 }}>From confusing legalese<br />to crystal-clear English</h2>
@@ -1104,7 +1056,6 @@ function HomePage({ setPage }) {
         </div>
       </section>
 
-      {/* TESTIMONIALS */}
       <section className="section" style={{ background: 'var(--bg-2)' }}>
         <div className="reveal section-center">
           <div className="eyebrow">Testimonials</div>
@@ -1127,7 +1078,6 @@ function HomePage({ setPage }) {
         </div>
       </section>
 
-      {/* CTA */}
       <section className="cta-section">
         <h2 className="cta-h2">Ready to understand your<br /><em style={{ fontStyle:'italic', color:'var(--accent-2)' }}>legal documents?</em></h2>
         <p className="cta-sub">Join 50,000+ people who cut through legal complexity with LegalEase.</p>
@@ -1151,9 +1101,6 @@ function FeatureCard({ icon, title, desc, delay }) {
   );
 }
 
-/* ─────────────────────────────────────────────
-   ABOUT PAGE
-───────────────────────────────────────────── */
 function AboutPage({ setPage }) {
   useScrollReveal();
   const values = [
@@ -1168,6 +1115,7 @@ function AboutPage({ setPage }) {
     { name:'MD Zaib', role:'Head of AI', init:'MZ', color:'var(--bg-3)', tc:'var(--ink-2)' },
     { name:'Sahil Alam', role:'Head of Design', init:'SA', color:'var(--red-bg)', tc:'var(--red)' },
   ];
+
   return (
     <>
       <section className="about-hero" style={{ position:'relative', zIndex:1 }}>
@@ -1198,7 +1146,13 @@ function AboutPage({ setPage }) {
 
         <div className="reveal"><div className="eyebrow">Our Values</div></div>
         <div className="values-grid" style={{ marginTop:16 }}>
-          {values.map((v,i) => <div className="value-card reveal" style={{ transitionDelay:`${i*0.08}s` }} key={i}><div className="value-num">{v.n}</div><div className="value-title">{v.title}</div><div className="value-desc">{v.desc}</div></div>)}
+          {values.map((v,i) => (
+            <div className="value-card reveal" style={{ transitionDelay:`${i*0.08}s` }} key={i}>
+              <div className="value-num">{v.n}</div>
+              <div className="value-title">{v.title}</div>
+              <div className="value-desc">{v.desc}</div>
+            </div>
+          ))}
         </div>
 
         <div className="team-section reveal">
@@ -1225,9 +1179,6 @@ function AboutPage({ setPage }) {
   );
 }
 
-/* ─────────────────────────────────────────────
-   CONTACT PAGE
-───────────────────────────────────────────── */
 function ContactPage() {
   const [form, setForm] = useState({ name:'', email:'', subject:'', message:'' });
   const [sent, setSent] = useState(false);
@@ -1318,9 +1269,6 @@ function ContactPage() {
   );
 }
 
-/* ─────────────────────────────────────────────
-   UPLOAD PAGE
-───────────────────────────────────────────── */
 function UploadPage({ onProcess }) {
   const [file, setFile] = useState(null);
   const [text, setText] = useState('');
@@ -1330,13 +1278,31 @@ function UploadPage({ onProcess }) {
 
   const handleFile = (f) => {
     if (!f) return;
-    setFile(f); setProgress(0);
-    const interval = setInterval(() => setProgress(p => { if (p >= 100) { clearInterval(interval); return 100; } return p + Math.random()*15; }), 80);
-    if (f.type === 'text/plain') { const r = new FileReader(); r.onload = e => setText(e.target.result); r.readAsText(f); }
+    setFile(f);
+    setProgress(0);
+
+    const interval = setInterval(() => setProgress(p => {
+      if (p >= 100) {
+        clearInterval(interval);
+        return 100;
+      }
+      return p + Math.random()*15;
+    }), 80);
+
+    if (f.type === 'text/plain') {
+      const r = new FileReader();
+      r.onload = e => setText(e.target.result);
+      r.readAsText(f);
+    }
   };
 
-  const onDrop = useCallback(e => { e.preventDefault(); setDrag(false); handleFile(e.dataTransfer.files[0]); }, []);
-  const canGo = file || text.trim().length > 50;
+  const onDrop = useCallback(e => {
+    e.preventDefault();
+    setDrag(false);
+    handleFile(e.dataTransfer.files[0]);
+  }, []);
+
+  const canGo = file || text.trim().length > 10;
 
   return (
     <div className="upload-page">
@@ -1402,9 +1368,6 @@ function UploadPage({ onProcess }) {
   );
 }
 
-/* ─────────────────────────────────────────────
-   PROCESSING PAGE — SKELETON
-───────────────────────────────────────────── */
 function ProcessingPage({ step }) {
   const steps = ['Reading document','Identifying clauses','Simplifying language','Detecting risks'];
   return (
@@ -1423,7 +1386,6 @@ function ProcessingPage({ step }) {
         ))}
       </div>
 
-      {/* Skeleton preview */}
       <div className="proc-skeleton-wrap">
         <div style={{ background:'var(--surface)', border:'1px solid var(--border)', borderRadius:'var(--r-xl)', padding:32, marginTop:32 }}>
           <div className="skeleton skel-header" />
@@ -1439,26 +1401,68 @@ function ProcessingPage({ step }) {
   );
 }
 
-/* ─────────────────────────────────────────────
-   RESULT PAGE
-───────────────────────────────────────────── */
-function ResultPage({ result, original, onReset, showToast }) {
+function ResultPage({
+  result,
+  original,
+  onReset,
+  showToast,
+  history = [],
+  onOpenHistory,
+  onDeleteHistory,
+  deletingId
+}) {
   const [tab, setTab] = useState('s');
   const [copied, setCopied] = useState(false);
   const [flash, setFlash] = useState(false);
 
   const copy = () => {
     navigator.clipboard.writeText(tab === 's' ? result.plainEnglish : original);
-    setCopied(true); setFlash(true);
+    setCopied(true);
+    setFlash(true);
     setTimeout(() => setCopied(false), 2000);
     setTimeout(() => setFlash(false), 500);
     showToast('Copied to clipboard!');
   };
 
+  const copyHistoryText = async (text) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      showToast('History text copied!');
+    } catch {
+      showToast('Copy failed', 'error');
+    }
+  };
+
   const dl = () => {
-    const b = new Blob([`LEGALEASE AI\n${'='.repeat(40)}\n\nSUMMARY\n${result.summary}\n\nKEY POINTS\n${result.keyPoints.map((p,i)=>`${i+1}. ${p}`).join('\n')}\n\nRISKS\n${result.risks.map(r=>`• ${r}`).join('\n')}\n\nFULL VERSION\n${result.plainEnglish}`], { type:'text/plain' });
-    const a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download = 'legalease-simplified.txt'; a.click();
+    const b = new Blob(
+      [
+        `LEGALEASE AI
+${'='.repeat(40)}
+
+SUMMARY
+${result.summary}
+
+KEY POINTS
+${result.keyPoints.map((p,i)=>`${i+1}. ${p}`).join('\n')}
+
+RISKS
+${result.risks.map(r=>`• ${r}`).join('\n')}
+
+FULL VERSION
+${result.plainEnglish}`
+      ],
+      { type:'text/plain' }
+    );
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(b);
+    a.download = 'legalease-simplified.txt';
+    a.click();
     showToast('Download started!', 'info');
+  };
+
+  const formatDate = (date) => {
+    if (!date) return 'Recently';
+    return new Date(date).toLocaleString();
   };
 
   return (
@@ -1487,12 +1491,14 @@ function ResultPage({ result, original, onReset, showToast }) {
         {tab === 's' ? (
           <div className="result-card simplified">
             <div className="result-badge ai">✦ AI Simplified</div>
+
             {result.summary && (
               <div className="sec-block">
                 <div className="sec-label">Plain English Summary</div>
                 <p style={{ fontSize:15, lineHeight:1.85, color:'var(--ink-2)' }}>{result.summary}</p>
               </div>
             )}
+
             {result.keyPoints?.length > 0 && (
               <div className="sec-block">
                 <div className="sec-label">Key Points</div>
@@ -1506,6 +1512,7 @@ function ResultPage({ result, original, onReset, showToast }) {
                 </ul>
               </div>
             )}
+
             {result.risks?.length > 0 && (
               <div className="sec-block">
                 <div className="sec-label">⚠ Risks & Watch-outs</div>
@@ -1517,6 +1524,7 @@ function ResultPage({ result, original, onReset, showToast }) {
                 ))}
               </div>
             )}
+
             <div className="sec-block">
               <div className="sec-label">Full Plain English Version</div>
               <p style={{ fontSize:15, lineHeight:1.95, color:'var(--ink-2)', whiteSpace:'pre-wrap' }}>{result.plainEnglish}</p>
@@ -1528,18 +1536,71 @@ function ResultPage({ result, original, onReset, showToast }) {
             <p style={{ fontSize:14, lineHeight:1.9, color:'var(--ink-3)', whiteSpace:'pre-wrap', fontFamily:'monospace' }}>{original}</p>
           </div>
         )}
+
+        <div className="history-wrap">
+          <div className="history-head">
+            <div>
+              <div className="history-title">Recent History</div>
+              <div className="history-sub">Your latest simplified legal documents</div>
+            </div>
+          </div>
+
+          {history.length === 0 ? (
+            <div className="history-empty">
+              No saved documents yet. Simplify a document to see it here.
+            </div>
+          ) : (
+            <div className="history-grid">
+              {history.map((doc) => (
+                <div key={doc._id} className="history-card">
+                  <div className="history-card-top">
+                    <span className="history-badge">Saved Document</span>
+                    <span className="history-date">{formatDate(doc.createdAt)}</span>
+                  </div>
+
+                  <div className="history-label">Original Text</div>
+                  <div className="history-text">{doc.originalText}</div>
+
+                  <div className="history-divider" />
+
+                  <div className="history-label">Simplified Text</div>
+                  <div className="history-text">{doc.simplifiedText}</div>
+
+                  <div className="history-actions">
+                    <button className="btn btn-ghost btn-sm" onClick={() => onOpenHistory(doc)}>
+                      Open
+                    </button>
+                    <button className="btn btn-ghost btn-sm" onClick={() => copyHistoryText(doc.simplifiedText)}>
+                      Copy
+                    </button>
+                    <button
+                      className="btn btn-danger btn-sm"
+                      onClick={() => onDeleteHistory(doc._id)}
+                      disabled={deletingId === doc._id}
+                    >
+                      {deletingId === doc._id ? 'Deleting...' : 'Delete'}
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
     </>
   );
 }
 
-/* ─────────────────────────────────────────────
-   AUTH MODAL
-───────────────────────────────────────────── */
 function AuthModal({ mode, onClose, onAuth }) {
   const [login, setLogin] = useState(mode === 'login');
   const [f, setF] = useState({ name:'', email:'', password:'' });
-  const go = () => { if (!f.email||!f.password) return; onAuth({ name:f.name||f.email.split('@')[0], email:f.email }); onClose(); };
+
+  const go = () => {
+    if (!f.email || !f.password) return;
+    onAuth({ name:f.name || f.email.split('@')[0], email:f.email });
+    onClose();
+  };
+
   return (
     <div className="modal-overlay" onClick={e => e.target===e.currentTarget&&onClose()}>
       <div className="modal">
@@ -1549,16 +1610,18 @@ function AuthModal({ mode, onClose, onAuth }) {
         {!login && <div className="mg"><label>Full Name</label><input placeholder="Jane Smith" value={f.name} onChange={e=>setF({...f,name:e.target.value})} /></div>}
         <div className="mg"><label>Email</label><input type="email" placeholder="jane@example.com" value={f.email} onChange={e=>setF({...f,email:e.target.value})} /></div>
         <div className="mg"><label>Password</label><input type="password" placeholder="••••••••" value={f.password} onChange={e=>setF({...f,password:e.target.value})} /></div>
-        <button className="btn btn-primary btn-md" style={{ width:'100%', justifyContent:'center', marginTop:8 }} onClick={go}>{login ? 'Sign in' : 'Create free account'}</button>
-        <div className="modal-sw">{login ? "Don't have an account? " : "Already have an account? "}<button onClick={() => setLogin(!login)}>{login ? 'Sign up free' : 'Sign in'}</button></div>
+        <button className="btn btn-primary btn-md" style={{ width:'100%', justifyContent:'center', marginTop:8 }} onClick={go}>
+          {login ? 'Sign in' : 'Create free account'}
+        </button>
+        <div className="modal-sw">
+          {login ? "Don't have an account? " : "Already have an account? "}
+          <button onClick={() => setLogin(!login)}>{login ? 'Sign up free' : 'Sign in'}</button>
+        </div>
       </div>
     </div>
   );
 }
 
-/* ─────────────────────────────────────────────
-   FOOTER
-───────────────────────────────────────────── */
 function Footer({ setPage }) {
   return (
     <footer className="footer">
@@ -1611,47 +1674,116 @@ function Footer({ setPage }) {
   );
 }
 
-/* ─────────────────────────────────────────────
-   ROOT APP
-───────────────────────────────────────────── */
 export default function App() {
   const [dark, setDark] = useState(false);
   const [page, setPage] = useState('home');
   const [procStep, setProcStep] = useState(0);
   const [result, setResult] = useState(null);
   const [original, setOriginal] = useState('');
+  const [history, setHistory] = useState([]);
+  const [deletingId, setDeletingId] = useState(null);
   const [authMode, setAuthMode] = useState(null);
   const [user, setUser] = useState(null);
   const { toasts, show: showToast, dismiss } = useToasts();
 
-  // Apply dark mode
   useEffect(() => {
     if (dark) document.documentElement.setAttribute('data-dark', '');
     else document.documentElement.removeAttribute('data-dark');
   }, [dark]);
 
-  const goTo = (p) => { setPage(p); window.scrollTo({ top:0, behavior:'smooth' }); };
+  const fetchHistory = async () => {
+    try {
+      const res = await fetch('http://localhost:5001/documents');
+      const data = await res.json();
+      if (Array.isArray(data)) {
+        setHistory(data);
+      } else {
+        setHistory([]);
+      }
+    } catch (error) {
+      console.error('History fetch error:', error);
+      setHistory([]);
+    }
+  };
+
+  useEffect(() => {
+    fetchHistory();
+  }, []);
+
+  const goTo = (p) => {
+    setPage(p);
+    window.scrollTo({ top:0, behavior:'smooth' });
+  };
 
   const handleProcess = async (text) => {
-    setOriginal(text); setPage('processing'); setProcStep(0);
+    setOriginal(text);
+    setPage('processing');
+    setProcStep(0);
+
     const t = setInterval(() => setProcStep(s => Math.min(s+1, 3)), 900);
+
     try {
       const res = await fetch('http://localhost:5001/simplify-text', {
-        method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({text})
+        method:'POST',
+        headers:{ 'Content-Type':'application/json' },
+        body:JSON.stringify({ text })
       });
+
       const data = await res.json();
-      clearInterval(t); setProcStep(3);
-      setResult(parseAI(data.result || data.simplified || text));
-    } catch {
+
       clearInterval(t);
+      setProcStep(3);
+
+      setResult(parseAI(data.result || data.simplifiedText || text));
+      await fetchHistory();
+      showToast('Document simplified and saved successfully!');
+    } catch (error) {
+      clearInterval(t);
+      console.error('Process error:', error);
+
       setResult({
         summary: text.slice(0, 300),
         keyPoints: ['Review key clauses carefully', 'Note any deadlines or obligations', 'Consult a lawyer if unsure'],
         risks: ['Some clauses may limit your rights', 'Auto-renewal terms may apply'],
         plainEnglish: text,
       });
+
+      showToast('Could not save to server. Showing fallback result.', 'error');
     }
+
     setPage('result');
+  };
+
+  const handleOpenHistory = (doc) => {
+    setOriginal(doc.originalText);
+    setResult(parseAI(doc.simplifiedText));
+    setPage('result');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    showToast('History item opened!');
+  };
+
+  const handleDeleteHistory = async (id) => {
+    try {
+      setDeletingId(id);
+
+      const res = await fetch(`http://localhost:5001/documents/${id}`, {
+        method: 'DELETE',
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.message || 'Delete failed');
+      }
+
+      setHistory((prev) => prev.filter((item) => item._id !== id));
+      showToast('Document deleted successfully');
+    } catch (error) {
+      console.error('Delete error:', error);
+      showToast('Failed to delete document', 'error');
+    } finally {
+      setDeletingId(null);
+    }
   };
 
   return (
@@ -1659,7 +1791,8 @@ export default function App() {
       <style>{BASE_CSS}</style>
 
       <Navbar
-        page={page} setPage={goTo}
+        page={page}
+        setPage={goTo}
         onLogin={() => setAuthMode('login')}
         onSignup={() => setAuthMode('signup')}
         user={user}
@@ -1673,18 +1806,35 @@ export default function App() {
         {page === 'upload'     && <UploadPage onProcess={handleProcess} />}
         {page === 'processing' && <ProcessingPage step={procStep} />}
         {page === 'result' && result && (
-          <><ResultPage result={result} original={original} onReset={() => { setPage('upload'); setResult(null); }} showToast={showToast} />
-          <Footer setPage={goTo} /></>
+          <>
+            <ResultPage
+              result={result}
+              original={original}
+              history={history}
+              onReset={() => {
+                setPage('upload');
+                setResult(null);
+              }}
+              showToast={showToast}
+              onOpenHistory={handleOpenHistory}
+              onDeleteHistory={handleDeleteHistory}
+              deletingId={deletingId}
+            />
+            <Footer setPage={goTo} />
+          </>
         )}
       </div>
 
-      {authMode && (
-        <AuthModal
-          mode={authMode}
-          onClose={() => setAuthMode(null)}
-          onAuth={u => { setUser(u); showToast(`Welcome, ${u.name}! 🎉`); }}
-        />
-      )}
+     {authMode && (
+  <AuthModal
+    mode={authMode}
+    onClose={() => setAuthMode(null)}
+    onAuth={(u) => {
+      setUser(u);
+      showToast(`Welcome, ${u.name}! 🎉`);
+    }}
+  />
+)}
 
       <ToastContainer toasts={toasts} dismiss={dismiss} />
     </ThemeCtx.Provider>
