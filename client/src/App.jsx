@@ -860,7 +860,8 @@ These Terms shall be governed by the laws of the State of Delaware, United State
 function parseAI(text) {
   const sec = {};
   const lines = text.split('\n');
-  let cur = 'summary', buf = [];
+  let cur = 'summary';
+  let buf = [];
 
   const flush = () => {
     if (buf.length) sec[cur] = buf.join('\n').trim();
@@ -868,11 +869,29 @@ function parseAI(text) {
   };
 
   for (const l of lines) {
-    if (/SUMMARY/i.test(l)) { flush(); cur = 'summary'; }
-    else if (/KEY POINTS|IMPORTANT/i.test(l)) { flush(); cur = 'kp'; }
-    else if (/RISKS|RED FLAGS/i.test(l)) { flush(); cur = 'risks'; }
-    else if (/PLAIN ENGLISH|SIMPLE/i.test(l)) { flush(); cur = 'plain'; }
-    else buf.push(l);
+    if (/^SUMMARY:/i.test(l)) {
+      flush();
+      cur = 'summary';
+      buf.push(l.replace(/^SUMMARY:/i, '').trim());
+    } else if (/^KEY POINTS:/i.test(l)) {
+      flush();
+      cur = 'kp';
+      buf.push(l.replace(/^KEY POINTS:/i, '').trim());
+    } else if (/^RISKS:/i.test(l)) {
+      flush();
+      cur = 'risks';
+      buf.push(l.replace(/^RISKS:/i, '').trim());
+    } else if (/^SUGGESTIONS:/i.test(l)) {
+      flush();
+      cur = 'suggestions';
+      buf.push(l.replace(/^SUGGESTIONS:/i, '').trim());
+    } else if (/^PLAIN ENGLISH:/i.test(l)) {
+      flush();
+      cur = 'plain';
+      buf.push(l.replace(/^PLAIN ENGLISH:/i, '').trim());
+    } else {
+      buf.push(l);
+    }
   }
 
   flush();
@@ -880,14 +899,15 @@ function parseAI(text) {
   const bullets = (t) =>
     (t || '')
       .split('\n')
-      .map(l => l.replace(/^[-•*\d.]+\s*/, '').trim())
+      .map((l) => l.replace(/^[-•*\d.]+\s*/, '').trim())
       .filter(Boolean);
 
   return {
     summary: sec.summary || text.slice(0, 400),
-    keyPoints: bullets(sec.kp).slice(0, 5),
-    risks: bullets(sec.risks).slice(0, 3),
-    plainEnglish: sec.plain || sec.summary || text,
+    keyPoints: bullets(sec.kp).slice(0, 6),
+    risks: bullets(sec.risks).slice(0, 5),
+    suggestions: bullets(sec.suggestions).slice(0, 5),
+    plainEnglish: sec.plain || text,
   };
 }
 
@@ -1269,7 +1289,7 @@ function ContactPage() {
   );
 }
 
-function UploadPage({ onProcess }) {
+function UploadPage({ onProcess, onPdfUpload }) {
   const [file, setFile] = useState(null);
   const [text, setText] = useState('');
   const [drag, setDrag] = useState(false);
@@ -1281,22 +1301,26 @@ function UploadPage({ onProcess }) {
     setFile(f);
     setProgress(0);
 
-    const interval = setInterval(() => setProgress(p => {
+    if (f.type === "application/pdf") {
+      setText("");
+    }
+
+    const interval = setInterval(() => setProgress((p) => {
       if (p >= 100) {
         clearInterval(interval);
         return 100;
       }
-      return p + Math.random()*15;
+      return p + Math.random() * 15;
     }), 80);
 
     if (f.type === 'text/plain') {
       const r = new FileReader();
-      r.onload = e => setText(e.target.result);
+      r.onload = (e) => setText(e.target.result);
       r.readAsText(f);
     }
   };
 
-  const onDrop = useCallback(e => {
+  const onDrop = useCallback((e) => {
     e.preventDefault();
     setDrag(false);
     handleFile(e.dataTransfer.files[0]);
@@ -1308,61 +1332,109 @@ function UploadPage({ onProcess }) {
     <div className="upload-page">
       <div style={{ textAlign:'center', marginBottom:44 }}>
         <div className="eyebrow">Simplify</div>
-        <h2 style={{ fontFamily:'var(--font-display)', fontSize:'clamp(36px,5vw,56px)', fontWeight:800, letterSpacing:'-1.5px', marginTop:8 }}>Upload Your Document</h2>
-        <p style={{ color:'var(--ink-3)', marginTop:12, fontSize:16 }}>Supports PDF, DOCX, TXT — or paste your text below</p>
+        <h2 style={{ fontFamily:'var(--font-display)', fontSize:'clamp(36px,5vw,56px)', fontWeight:800, letterSpacing:'-1.5px', marginTop:8 }}>
+          Upload Your Document
+        </h2>
+        <p style={{ color:'var(--ink-3)', marginTop:12, fontSize:16 }}>
+          Supports PDF, DOCX, TXT — or paste your text below
+        </p>
       </div>
 
       <div className="upload-wrap">
         <div
-          className={`drop-zone${drag?' drag':''}`}
+          className={`drop-zone${drag ? ' drag' : ''}`}
           onClick={() => ref.current?.click()}
-          onDragOver={e => { e.preventDefault(); setDrag(true); }}
+          onDragOver={(e) => {
+            e.preventDefault();
+            setDrag(true);
+          }}
           onDragLeave={() => setDrag(false)}
           onDrop={onDrop}
           style={{ position:'relative', zIndex:1 }}
         >
-          <input ref={ref} type="file" accept=".pdf,.docx,.txt" style={{ display:'none' }} onChange={e => handleFile(e.target.files[0])} />
-          <span className="drop-icon" style={{ position:'relative', zIndex:1 }}>{drag ? '🎯' : '📂'}</span>
-          <h3 style={{ position:'relative', zIndex:1 }}>{drag ? 'Release to upload!' : 'Drag & drop your file'}</h3>
+          <input
+            ref={ref}
+            type="file"
+            accept=".pdf,.docx,.txt"
+            style={{ display:'none' }}
+            onChange={(e) => handleFile(e.target.files[0])}
+          />
+          <span className="drop-icon" style={{ position:'relative', zIndex:1 }}>
+            {drag ? '🎯' : '📂'}
+          </span>
+          <h3 style={{ position:'relative', zIndex:1 }}>
+            {drag ? 'Release to upload!' : 'Drag & drop your file'}
+          </h3>
           <p style={{ position:'relative', zIndex:1 }}>or click to browse</p>
           <div className="file-types" style={{ position:'relative', zIndex:1 }}>
-            {['PDF','DOCX','TXT'].map(t => <span key={t} className="type-badge">{t}</span>)}
+            {['PDF','DOCX','TXT'].map((t) => (
+              <span key={t} className="type-badge">{t}</span>
+            ))}
           </div>
         </div>
 
         {file && (
           <div className="file-preview">
-            <span style={{ fontSize:32 }}>{file.name.endsWith('.pdf')?'📕':file.name.endsWith('.docx')?'📘':'📝'}</span>
+            <span style={{ fontSize:32 }}>
+              {file.name.endsWith('.pdf') ? '📕' : file.name.endsWith('.docx') ? '📘' : '📝'}
+            </span>
             <div className="file-info">
               <div className="file-name">{file.name}</div>
-              <div className="file-size">{(file.size/1024).toFixed(1)} KB</div>
+              <div className="file-size">{(file.size / 1024).toFixed(1)} KB</div>
               {progress < 100 && (
                 <div className="progress-bar-wrap" style={{ marginTop:8 }}>
                   <div className="progress-bar-fill" style={{ width:`${Math.min(progress,100)}%` }} />
                 </div>
               )}
-              {progress >= 100 && <div style={{ fontSize:11, color:'var(--green)', marginTop:4, fontWeight:600 }}>✓ Ready</div>}
+              {progress >= 100 && (
+                <div style={{ fontSize:11, color:'var(--green)', marginTop:4, fontWeight:600 }}>
+                  ✓ Ready
+                </div>
+              )}
             </div>
-            <button className="btn btn-ghost btn-sm" onClick={() => { setFile(null); setText(''); setProgress(0); }}>Remove</button>
+            <button
+              className="btn btn-ghost btn-sm"
+              onClick={() => {
+                setFile(null);
+                setText('');
+                setProgress(0);
+              }}
+            >
+              Remove
+            </button>
           </div>
         )}
 
         <div className="or-divider">or paste text directly</div>
-        <label className="form-label" style={{ display:'block', marginBottom:8 }}>Paste Legal Text</label>
+        <label className="form-label" style={{ display:'block', marginBottom:8 }}>
+          Paste Legal Text
+        </label>
         <textarea
           className="paste-area"
           placeholder="Paste your contract, agreement, or any legal text here…"
           value={text}
-          onChange={e => setText(e.target.value)}
+          onChange={(e) => setText(e.target.value)}
         />
+
         <button
           className="simplify-btn"
           disabled={!canGo}
-          onClick={() => onProcess(text.trim() || (file ? `[Content from ${file.name}]` : getDemoText()))}
+          onClick={() => {
+            if (file && file.type === "application/pdf") {
+              onPdfUpload(file);
+            } else {
+              onProcess(
+                text.trim() || (file ? `[Content from ${file.name}]` : getDemoText())
+              );
+            }
+          }}
         >
           <span>✦</span> Simplify with AI
         </button>
-        <p className="security-note"><span>🔒</span> Your document is encrypted and never stored</p>
+
+        <p className="security-note">
+          <span>🔒</span> Your document is encrypted and never stored
+        </p>
       </div>
     </div>
   );
@@ -1524,6 +1596,19 @@ ${result.plainEnglish}`
                 ))}
               </div>
             )}
+            {result.suggestions?.length > 0 && (
+  <div className="sec-block">
+    <div className="sec-label">Suggestions</div>
+    <ul className="kp-list">
+      {result.suggestions.map((item, i) => (
+        <li key={i} className="kp">
+          <span className="kp-icon">→</span>
+          <span className="kp-txt">{item}</span>
+        </li>
+      ))}
+    </ul>
+  </div>
+)}
 
             <div className="sec-block">
               <div className="sec-label">Full Plain English Version</div>
@@ -1754,6 +1839,43 @@ export default function App() {
     setPage('result');
   };
 
+  const handlePdfUpload = async (file) => {
+  setPage("processing");
+  setProcStep(0);
+
+  const t = setInterval(() => setProcStep((s) => Math.min(s + 1, 3)), 900);
+
+  try {
+    const formData = new FormData();
+    formData.append("pdf", file);
+
+    const res = await fetch("http://localhost:5001/upload-pdf", {
+      method: "POST",
+      body: formData,
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      throw new Error(data.error || "PDF upload failed");
+    }
+
+    clearInterval(t);
+    setProcStep(3);
+
+    setOriginal(data.savedDocument?.originalText || "");
+    setResult(parseAI(data.result || ""));
+    await fetchHistory();
+    showToast("PDF analyzed and saved successfully!");
+    setPage("result");
+  } catch (error) {
+    clearInterval(t);
+    console.error("PDF upload error:", error);
+    showToast(error.message || "PDF upload failed", "error");
+    setPage("upload");
+  }
+};
+
   const handleOpenHistory = (doc) => {
     setOriginal(doc.originalText);
     setResult(parseAI(doc.simplifiedText));
@@ -1803,7 +1925,12 @@ export default function App() {
         {page === 'home'       && <><HomePage setPage={goTo} /><Footer setPage={goTo} /></>}
         {page === 'about'      && <><AboutPage setPage={goTo} /><Footer setPage={goTo} /></>}
         {page === 'contact'    && <><ContactPage /><Footer setPage={goTo} /></>}
-        {page === 'upload'     && <UploadPage onProcess={handleProcess} />}
+        {page === 'upload' && (
+  <UploadPage
+    onProcess={handleProcess}
+    onPdfUpload={handlePdfUpload}
+  />
+)}
         {page === 'processing' && <ProcessingPage step={procStep} />}
         {page === 'result' && result && (
           <>
