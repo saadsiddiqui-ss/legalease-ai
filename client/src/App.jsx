@@ -857,6 +857,30 @@ You agree to defend, indemnify, and hold harmless the Company and its employees,
 These Terms shall be governed by the laws of the State of Delaware, United States. Any disputes shall be resolved through binding arbitration.`;
 }
 
+
+const API_BASE = "http://localhost:5001";
+
+const getToken = () => localStorage.getItem("token");
+
+const getStoredUser = () => {
+  try {
+    const raw = localStorage.getItem("user");
+    return raw ? JSON.parse(raw) : null;
+  } catch {
+    return null;
+  }
+};
+
+const saveAuth = (token, user) => {
+  localStorage.setItem("token", token);
+  localStorage.setItem("user", JSON.stringify(user));
+};
+
+const clearAuth = () => {
+  localStorage.removeItem("token");
+  localStorage.removeItem("user");
+};
+
 function parseAI(text) {
   const sec = {};
   const lines = text.split('\n');
@@ -1676,14 +1700,41 @@ ${result.plainEnglish}`
   );
 }
 
-function AuthModal({ mode, onClose, onAuth }) {
+function AuthModal({ mode, onClose, onAuth, showToast }) {
   const [login, setLogin] = useState(mode === 'login');
   const [f, setF] = useState({ name:'', email:'', password:'' });
 
-  const go = () => {
-    if (!f.email || !f.password) return;
-    onAuth({ name:f.name || f.email.split('@')[0], email:f.email });
-    onClose();
+  const go = async () => {
+    if (!f.email || !f.password || (!login && !f.name)) {
+      showToast('Please fill all required fields', 'error');
+      return;
+    }
+
+    try {
+      const endpoint = login ? 'login' : 'signup';
+      const payload = login
+        ? { email: f.email, password: f.password }
+        : { name: f.name, email: f.email, password: f.password };
+
+      const res = await fetch(`${API_BASE}/${endpoint}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.message || data.error || `${endpoint} failed`);
+      }
+
+      saveAuth(data.token, data.user);
+      onAuth(data.user);
+      onClose();
+    } catch (error) {
+      console.error('Auth error:', error);
+      showToast(error.message || 'Authentication failed', 'error');
+    }
   };
 
   return (
@@ -1776,10 +1827,34 @@ export default function App() {
     else document.documentElement.removeAttribute('data-dark');
   }, [dark]);
 
+  useEffect(() => {
+    const storedUser = getStoredUser();
+    if (storedUser) {
+      setUser(storedUser);
+    }
+  }, []);
+
   const fetchHistory = async () => {
     try {
-      const res = await fetch('http://localhost:5001/documents');
+      const token = getToken();
+
+      if (!token) {
+        setHistory([]);
+        return;
+      }
+
+      const res = await fetch(`${API_BASE}/documents`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
       const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.message || 'Failed to fetch history');
+      }
+
       if (Array.isArray(data)) {
         setHistory(data);
       } else {
@@ -1792,8 +1867,12 @@ export default function App() {
   };
 
   useEffect(() => {
-    fetchHistory();
-  }, []);
+    if (user) {
+      fetchHistory();
+    } else {
+      setHistory([]);
+    }
+  }, [user]);
 
   const goTo = (p) => {
     setPage(p);
@@ -1801,20 +1880,35 @@ export default function App() {
   };
 
   const handleProcess = async (text) => {
+    const token = getToken();
+
+    if (!token) {
+      showToast('Please log in first', 'error');
+      setAuthMode('login');
+      return;
+    }
+
     setOriginal(text);
     setPage('processing');
     setProcStep(0);
 
-    const t = setInterval(() => setProcStep(s => Math.min(s+1, 3)), 900);
+    const t = setInterval(() => setProcStep(s => Math.min(s + 1, 3)), 900);
 
     try {
-      const res = await fetch('http://localhost:5001/simplify-text', {
-        method:'POST',
-        headers:{ 'Content-Type':'application/json' },
-        body:JSON.stringify({ text })
+      const res = await fetch(`${API_BASE}/simplify-text`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ text }),
       });
 
       const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.message || data.error || 'Simplify failed');
+      }
 
       clearInterval(t);
       setProcStep(3);
@@ -1830,51 +1924,63 @@ export default function App() {
         summary: text.slice(0, 300),
         keyPoints: ['Review key clauses carefully', 'Note any deadlines or obligations', 'Consult a lawyer if unsure'],
         risks: ['Some clauses may limit your rights', 'Auto-renewal terms may apply'],
+        suggestions: ['Review the document carefully before signing'],
         plainEnglish: text,
       });
 
-      showToast('Could not save to server. Showing fallback result.', 'error');
+      showToast(error.message || 'Could not save to server', 'error');
     }
 
     setPage('result');
   };
 
   const handlePdfUpload = async (file) => {
-  setPage("processing");
-  setProcStep(0);
+    const token = getToken();
 
-  const t = setInterval(() => setProcStep((s) => Math.min(s + 1, 3)), 900);
-
-  try {
-    const formData = new FormData();
-    formData.append("pdf", file);
-
-    const res = await fetch("http://localhost:5001/upload-pdf", {
-      method: "POST",
-      body: formData,
-    });
-
-    const data = await res.json();
-
-    if (!res.ok) {
-      throw new Error(data.error || "PDF upload failed");
+    if (!token) {
+      showToast('Please log in first', 'error');
+      setAuthMode('login');
+      return;
     }
 
-    clearInterval(t);
-    setProcStep(3);
+    setPage('processing');
+    setProcStep(0);
 
-    setOriginal(data.savedDocument?.originalText || "");
-    setResult(parseAI(data.result || ""));
-    await fetchHistory();
-    showToast("PDF analyzed and saved successfully!");
-    setPage("result");
-  } catch (error) {
-    clearInterval(t);
-    console.error("PDF upload error:", error);
-    showToast(error.message || "PDF upload failed", "error");
-    setPage("upload");
-  }
-};
+    const t = setInterval(() => setProcStep((s) => Math.min(s + 1, 3)), 900);
+
+    try {
+      const formData = new FormData();
+      formData.append('pdf', file);
+
+      const res = await fetch(`${API_BASE}/upload-pdf`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        body: formData,
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.message || data.error || 'PDF upload failed');
+      }
+
+      clearInterval(t);
+      setProcStep(3);
+
+      setOriginal(data.savedDocument?.originalText || '');
+      setResult(parseAI(data.result || ''));
+      await fetchHistory();
+      showToast('PDF analyzed and saved successfully!');
+      setPage('result');
+    } catch (error) {
+      clearInterval(t);
+      console.error('PDF upload error:', error);
+      showToast(error.message || 'PDF upload failed', 'error');
+      setPage('upload');
+    }
+  };
 
   const handleOpenHistory = (doc) => {
     setOriginal(doc.originalText);
@@ -1886,10 +1992,21 @@ export default function App() {
 
   const handleDeleteHistory = async (id) => {
     try {
+      const token = getToken();
+
+      if (!token) {
+        showToast('Please log in first', 'error');
+        setAuthMode('login');
+        return;
+      }
+
       setDeletingId(id);
 
-      const res = await fetch(`http://localhost:5001/documents/${id}`, {
+      const res = await fetch(`${API_BASE}/documents/${id}`, {
         method: 'DELETE',
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
       });
 
       const data = await res.json();
@@ -1902,7 +2019,7 @@ export default function App() {
       showToast('Document deleted successfully');
     } catch (error) {
       console.error('Delete error:', error);
-      showToast('Failed to delete document', 'error');
+      showToast(error.message || 'Failed to delete document', 'error');
     } finally {
       setDeletingId(null);
     }
@@ -1918,7 +2035,7 @@ export default function App() {
         onLogin={() => setAuthMode('login')}
         onSignup={() => setAuthMode('signup')}
         user={user}
-        onLogout={() => { setUser(null); showToast('Logged out successfully'); }}
+        onLogout={() => { clearAuth(); setUser(null); setHistory([]); showToast('Logged out successfully'); }}
       />
 
       <div key={page} className="page-enter">
@@ -1952,16 +2069,17 @@ export default function App() {
         )}
       </div>
 
-     {authMode && (
-  <AuthModal
-    mode={authMode}
-    onClose={() => setAuthMode(null)}
-    onAuth={(u) => {
-      setUser(u);
-      showToast(`Welcome, ${u.name}! 🎉`);
-    }}
-  />
-)}
+      {authMode && (
+        <AuthModal
+          mode={authMode}
+          onClose={() => setAuthMode(null)}
+          onAuth={(u) => {
+            setUser(u);
+            showToast(`Welcome, ${u.name}! 🎉`);
+          }}
+          showToast={showToast}
+        />
+      )}
 
       <ToastContainer toasts={toasts} dismiss={dismiss} />
     </ThemeCtx.Provider>
