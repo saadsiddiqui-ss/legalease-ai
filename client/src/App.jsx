@@ -858,7 +858,7 @@ These Terms shall be governed by the laws of the State of Delaware, United State
 }
 
 
-const API_BASE = "http://localhost:5001";
+const API_BASE = "https://legalease-backend-oy73.onrender.com";
 
 const getToken = () => localStorage.getItem("token");
 
